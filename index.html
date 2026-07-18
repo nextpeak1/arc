@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Strict Content Security Policy remains locked down -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">
+    <meta name="description" content="arcdrift.net">
+    
+    <title>arcdrift.net</title>
+    
+    <style>
+        :root {
+            --bg-color: #eaf0f6; 
+            --snow-surface: linear-gradient(135deg, #fbfcfd 0%, #e1e9f0 100%);
+            --text-color: #1a1e25;
+            --accent-color: #556373; /* Darkened slightly to meet WCAG AA contrast (4.5:1+) */
+            
+            --trench-shadow: #b5c4d2;
+            --trench-highlight: #ffffff;
+            --spray-color: #ffffff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #06080c;
+                --snow-surface: linear-gradient(135deg, #0b0f17 0%, #05070a 100%);
+                --text-color: #e2e8f0;
+                --accent-color: #7a8b9e; /* Adjusted for dark mode readability */
+                
+                --trench-shadow: #020305;
+                --trench-highlight: #1c2331;
+                --spray-color: rgba(241, 245, 249, 0.85);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background: var(--snow-surface);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .snowfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Promotes vector rendering to the GPU for fluid rendering */
+        .trench, .snow-plume {
+            will-change: transform, opacity;
+        }
+
+        .trench {
+            fill: none;
+            stroke-linecap: round;
+            stroke-dasharray: 1200;
+            stroke-dashoffset: 1200;
+            animation: carveTrack 7.5s cubic-bezier(0.2, 0.5, 0.3, 1) forwards;
+        }
+
+        .trench-shading { stroke: var(--trench-shadow); stroke-width: 1.4; }
+        .trench-core { stroke: var(--trench-highlight); stroke-width: 0.5; }
+
+        .snow-plume {
+            fill: none;
+            stroke: var(--spray-color);
+            stroke-width: 16;
+            stroke-linecap: round;
+            filter: url(#organic-snow-texture);
+            stroke-dasharray: 1200;
+            stroke-dashoffset: 1200;
+            opacity: 0;
+            transform-origin: center;
+            
+            /* Cleaner cross-browser animation blending */
+            animation: 
+                plowSpray 7.5s cubic-bezier(0.2, 0.5, 0.3, 1) forwards,
+                slowDissolve 8.5s cubic-bezier(0.3, 0.1, 0.8, 0.4) forwards;
+        }
+
+        .ski-two {
+            animation-delay: 0.08s;
+        }
+
+        main {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            mix-blend-mode: multiply;
+            animation: fadeInText 3s ease-out forwards;
+            animation-delay: 1.5s;
+            opacity: 0;
+            will-change: opacity;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            main { mix-blend-mode: screen; }
+        }
+
+        h1 {
+            font-weight: 200;
+            font-size: 2.5rem;
+            letter-spacing: 0.3em;
+            margin: 0;
+            text-transform: lowercase;
+            padding-left: 0.3em; 
+        }
+
+        span.ext {
+            font-weight: 400;
+            color: var(--accent-color);
+        }
+
+        @keyframes carveTrack {
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes plowSpray {
+            0% { opacity: 0; }
+            4% { opacity: 0.95; }
+            100% { stroke-dashoffset: 10; }
+        }
+
+        /* Fixed to strictly use standard transforms and opacity to prevent WebKit rendering bugs */
+        @keyframes slowDissolve {
+            0% { opacity: 0.95; transform: scale(1) translate(0, 0); }
+            50% { opacity: 0.85; }
+            100% { 
+                opacity: 0; 
+                transform: scale(1.02) translate(-8px, -4px); 
+            }
+        }
+
+        @keyframes fadeInText {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Added aria-hidden to fully remove decorative graphics from screen reader trees -->
+    <svg class="snowfield" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        
+        <defs>
+            <filter id="organic-snow-texture" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="4" result="heavyNoise" />
+                <feDisplacementMap in="SourceGraphic" in2="heavyNoise" scale="30" xChannelSelector="R" yChannelSelector="G" result="displacedSnow" />
+                <feGaussianBlur in="displacedSnow" stdDeviation="3.5" />
+            </filter>
+        </defs>
+
+        <!-- TRACK ONE (LEFT SKI) -->
+        <path class="trench trench-shading" d="M 885,-20 C 705,180 565,80 425,320 C 305,520 165,480 -65,580" />
+        <path class="trench trench-core" d="M 887,-22 C 706,179 566,79 426,319 C 306,519 166,479 -63,578" />
+        <path class="snow-plume" d="M 880,-20 C 700,180 560,80 420,320 C 300,520 160,480 -70,580" />
+
+        <!-- TRACK TWO (RIGHT SKI) -->
+        <path class="trench trench-shading ski-two" d="M 915,-10 C 735,190 595,90 455,330 C 335,530 195,490 -35,590" />
+        <path class="trench trench-core ski-two" d="M 917,-12 C 736,189 596,89 456,329 C 336,529 196,489 -33,588" />
+        <path class="snow-plume ski-two" d="M 910,-10 C 730,190 590,90 450,330 C 330,530 190,490 -40,590" />
+
+    </svg>
+
+    <main>
+        <h1>arcdrift<span class="ext">.net</span></h1>
+    </main>
+
+</body>
+</html>
